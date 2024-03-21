@@ -1,5 +1,5 @@
 # Implement RAG technique using Langchain, 
-# ChromaDB on GPT 3.5 Turbo t for conversational chatbot on a PDF document.
+# ChromaDB on GPT 3.5 Turbo for conversational chatbot on a PDF document.
 
 # 0. Setup virtual environment
 # type the following commands in the terminal
@@ -53,15 +53,21 @@ vectDB = Chroma.from_documents(splitData,
 vectDB.persist()
 
 # 2. Create a Conversational Chatbot using RAG technique
-## a. setup the conversational chatbot
+## a. create a retriever from the vector embeddings
+retriever = vectDB.as_retriever(
+    search_type='similarity',
+    search_kwargs={'k':5}
+)
+
+## b. setup the conversational chatbot
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 chatQA = ConversationalRetrievalChain.from_llm(
             ChatOpenAI(openai_api_key=openai_key,
                temperature=0, model_name="gpt-3.5-turbo"), 
-            vectDB.as_retriever(), 
+            retriever, 
             memory=memory)
 
-## b. chat with the chatbot
+## c. chat with the chatbot
 chat_history = []
 qry = ""
 while qry != 'done':
